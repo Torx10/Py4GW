@@ -183,41 +183,23 @@ def main():
             # Define button label dynamically based on enable_all state
             toggle_label = "All Widgets toggled: ON" if enable_all else "All Widgets toggled: OFF"
             
-            # Make it look like a menu bar when it isnt a menu bar 
-            PyImGui.push_style_var2(ImGuiStyleVar.FramePadding, 0.0, 0.0)
-            PyImGui.push_style_var(ImGuiStyleVar.FrameBorderSize, 0.0)
-            PyImGui.push_style_var2(ImGuiStyleVar.ButtonTextAlign, 0.0, 0.0)   
-            PyImGui.push_style_color(PyImGui.ImGuiCol.Button, (0, 0, 0, 0))
-            PyImGui.push_style_color(PyImGui.ImGuiCol.ButtonHovered, (0, 0, 0, 0))
-            PyImGui.push_style_color(PyImGui.ImGuiCol.ButtonActive, (0, 0, 0, 0))
-
-            # Create a button to open the menu
-            if PyImGui.button("Options"):
-                PyImGui.open_popup("OptionsMenu")
-                
+            if PyImGui.button("Reload Widgets"):
+                Py4GW.Console.Log(module_name, "Reloading Widgets...", Py4GW.Console.MessageType.Info)
+                # This might not be needed, but just in case.
+                if "handler" in globals():
+                    del handler  
+                initialized = False
+                handler = WidgetHandler("Widgets")
+                handler.discover_widgets()
+                initialized = True
+    
             PyImGui.same_line(0.0, 10)
             
             # Create a toggle button to enable/disable all widgets
             if PyImGui.button(toggle_label):
                 enable_all = not enable_all  # Toggle state
                 ini_handler.write_key(module_name, "enable_all", str(enable_all))  # Save state
-            # Restore the styles back to default
-            PyImGui.pop_style_var(3)
-            PyImGui.pop_style_color(3)
             
-            # Create a popup menu that appears when clicking the button
-            if PyImGui.begin_popup("OptionsMenu"):
-                if PyImGui.menu_item("Reload Widgets"):
-                    Py4GW.Console.Log(module_name, "Reloading Widgets...", Py4GW.Console.MessageType.Info)
-                    # This might not be needed, but just in case.
-                    if "handler" in globals():
-                        del handler  
-                    initialized = False
-                    handler = WidgetHandler("Widgets")
-                    handler.discover_widgets()
-                    initialized = True
-                PyImGui.end_popup()
-
             PyImGui.separator()
 
             categorized_widgets = {}
