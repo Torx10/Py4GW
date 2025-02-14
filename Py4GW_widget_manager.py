@@ -181,7 +181,7 @@ def main():
             current_window_collapsed = False
             
             # Define button label dynamically based on enable_all state
-            toggle_label = "Toggle All Widgets: OFF" if enable_all else "Toggle All Widgets: ON"
+            toggle_label = "All Widgets toggled: ON" if enable_all else "All Widgets toggled: OFF"
             
             # Make it look like a menu bar when it isnt a menu bar 
             PyImGui.push_style_var2(ImGuiStyleVar.FramePadding, 0.0, 0.0)
