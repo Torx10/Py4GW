@@ -6,6 +6,7 @@ from .Agent import *
 from .Player import *
 
 from .Py4GWcorelib import Utils
+from typing import List, Tuple
 
 class AgentArray:
     @staticmethod
@@ -300,3 +301,57 @@ class AgentArray:
 
             return center_of_mass, closest_agent_id
 
+        @staticmethod
+        def enemy_clusters(radius: float = 1000.0, mode: str = "engage"):
+            """
+            Find enemy clusters within a given radius.
+
+            :param radius: Maximum distance between enemies in a cluster.
+            :param mode: Either "engage" (prefer closer/larger clusters)
+                        or "avoid" (prefer farther/smaller clusters).
+            :return: List of clusters and the best cluster (by score).
+            """
+            from math import dist
+
+            enemies = AgentArray.GetEnemyArray()
+            positions = {aid: Agent.GetXY(aid) for aid in enemies}
+
+            clusters = []
+            visited = set()
+
+            for aid, apos in positions.items():
+                if aid in visited:
+                    continue
+                cluster = [aid]
+                visited.add(aid)
+                for other_id, other_pos in positions.items():
+                    if other_id != aid and other_id not in visited:
+                        if dist(apos, other_pos) <= radius:
+                            cluster.append(other_id)
+                            visited.add(other_id)
+                clusters.append(cluster)
+
+            # Compute cluster properties
+            player = Player.GetAgentID()
+            px, py = Player.GetXY() if player else (0, 0)
+
+            def cluster_centroid(cluster):
+                xs, ys = zip(*(positions[aid] for aid in cluster))
+                return sum(xs) / len(xs), sum(ys) / len(ys)
+
+            scored_clusters = []
+            for cluster in clusters:
+                size = len(cluster)
+                cx, cy = cluster_centroid(cluster)
+                distance_to_player = dist((px, py), (cx, cy))
+                score = size / (distance_to_player + 1) if mode == "engage" else distance_to_player / (size + 1)
+                scored_clusters.append({
+                    "cluster": cluster,
+                    "size": size,
+                    "centroid": (cx, cy),
+                    "distance": distance_to_player,
+                    "score": score
+                })
+
+            best = max(scored_clusters, key=lambda c: c["score"]) if scored_clusters else None
+            return scored_clusters, best
