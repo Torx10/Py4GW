@@ -147,8 +147,6 @@ def draw_all_agents(center_x, center_y, player_x, player_y, zoom, rotation_angle
     flip_y = -1 if config_var._debug_invert_y else 1
     cos_a = math.cos(-rotation_angle + math.pi / 2)
     sin_a = math.sin(-rotation_angle + math.pi / 2)
-    half_width = config_var.canvas_width / 2
-    half_height = config_var.canvas_height / 2
     
     for entry in config_var.agent_cache:
         agent = entry["agent"]
@@ -161,7 +159,7 @@ def draw_all_agents(center_x, center_y, player_x, player_y, zoom, rotation_angle
         dy = y - player_y
 
         # Culling
-        if dx * dx + dy * dy > MAX_AGENT_RENDER_DISTANCE * MAX_AGENT_RENDER_DISTANCE:
+        if dx * dx + dy * dy > MAX_AGENT_RENDER_DISTANCE ** 2:
             continue
 
         # Rotate and transform
@@ -170,12 +168,6 @@ def draw_all_agents(center_x, center_y, player_x, player_y, zoom, rotation_angle
         cx = center_x + rx * zoom
         cy = center_y + ry * zoom
         
-        screen_x = cx + half_width
-        screen_y = cy + half_height
-        # print(f"cx={cx:.1f}, cy={cy:.1f}, screen_x={screen_x:.1f}, screen_y={screen_y:.1f}")
-        # if not (0 <= screen_x <= config_var.canvas_width and 0 <= screen_y <= config_var.canvas_height):
-        #     continue
-
         color = get_agent_draw_color(agent, is_alive, is_boss)
         radius = 3.5 if is_boss else 2.2
         segments = 8 if is_low_priority(agent) else 12
